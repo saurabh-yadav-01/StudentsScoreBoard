@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Study Classes Toppers - Premium Leaderboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Source+Sans+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Premium Background Effects -->
+        <div class="bg-effects">
+            <div class="bg-gradient-1"></div>
+            <div class="bg-gradient-2"></div>
+            <div class="bg-gradient-3"></div>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-icon-container">
+                    <i class="fas fa-trophy header-icon"></i>
+                    <div class="icon-glow"></div>
+                </div>
+                <h1 class="header-title">Smart Study Classes</h1>
+                <h2 class="header-subtitle">Premium Toppers Leaderboard</h2>
+                <p class="header-description">Upload Excel file to generate beautiful premium leaderboard</p>
+            </div>
+        </header>
+
+        <!-- Template Download Section -->
+        <section class="template-section">
+            <div class="template-container">
+                <h3 class="template-title">📊 Excel Template</h3>
+                <p class="template-description">Download our premium template for consistent data formatting</p>
+                <button class="btn btn--premium template-download-btn" id="templateDownloadBtn">
+                    <i class="fas fa-download"></i>
+                    <span>Download Premium Template</span>
+                    <div class="btn-shine"></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-container">
+                <div class="upload-area glass-morphism" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon-container">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-icon-glow"></div>
+                        </div>
+                        <h3 class="upload-title">Drop Excel File Here</h3>
+                        <p class="upload-description">Drag and drop your Excel file or click to browse</p>
+                        <p class="upload-format">Supports .xlsx and .xls files</p>
+                        <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" />
+                        <button class="btn btn--premium upload-btn" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Select Premium File</span>
+                            <div class="btn-shine"></div>
+                        </button>
+                    </div>
+                </div>
+                <div class="file-info glass-morphism hidden" id="fileInfo">
+                    <i class="fas fa-check-circle file-check-icon"></i>
+                    <span id="fileName">File selected</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div class="loading-container hidden" id="loadingContainer">
+            <div class="loading-content glass-morphism">
+                <div class="premium-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+                <p class="loading-text">Processing your premium file...</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="message-container error-message hidden" id="errorMessage">
+            <div class="message-content glass-morphism">
+                <i class="fas fa-exclamation-triangle message-icon"></i>
+                <span id="errorText"></span>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="message-container success-message hidden" id="successMessage">
+            <div class="message-content glass-morphism">
+                <i class="fas fa-check-circle message-icon"></i>
+                <span id="successText"></span>
+            </div>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <section class="leaderboard-section hidden" id="leaderboardSection">
+            <!-- Controls -->
+            <div class="leaderboard-controls">
+                <button class="btn btn--secondary reset-btn" id="resetBtn">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload New File</span>
+                </button>
+            </div>
+
+            <!-- Top 3 Premium Podium -->
+            <div class="podium-container">
+                <div class="podium-title">
+                    <h2 class="podium-header">🏆 Premium Top Performers 🏆</h2>
+                    <p class="podium-subtitle">Excellence Recognized</p>
+                </div>
+                <div class="podium glass-morphism" id="podium">
+                    <!-- Podium positions will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Remaining Students -->
+            <div class="remaining-students" id="remainingStudents">
+                <h3 class="remaining-title">Elite Rankings</h3>
+                <div class="student-list" id="studentList">
+                    <!-- Student cards will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Download Button -->
+            <div class="download-section">
+                <button class="btn btn--premium btn--large download-btn" id="downloadBtn">
+                    <i class="fas fa-camera"></i>
+                    <span>Capture Premium Screenshot</span>
+                    <div class="btn-shine"></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <div class="demo-section">
+            <button class="btn btn--outline demo-btn" id="demoBtn">
+                <i class="fas fa-play"></i>
+                <span>Try Premium Demo</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
