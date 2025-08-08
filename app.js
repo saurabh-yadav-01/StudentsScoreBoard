@@ -1,30 +1,30 @@
-// Premium Student Leaderboard Application
+// Updated Premium Student Leaderboard Application
 let studentsData = [];
 let isProcessing = false;
 
-// Premium sample data for demo
+// Updated sample data with new structure
 const premiumSampleData = [
-    {"Name": "Alice Johnson", "Course": "Computer Science", "Marks": 98},
-    {"Name": "David Martinez", "Course": "Mathematics", "Marks": 95},
-    {"Name": "Emma Thompson", "Course": "Physics", "Marks": 92},
-    {"Name": "Michael Chen", "Course": "Chemistry", "Marks": 90},
-    {"Name": "Sarah Williams", "Course": "Biology", "Marks": 88},
-    {"Name": "James Rodriguez", "Course": "English Literature", "Marks": 86},
-    {"Name": "Sophia Kumar", "Course": "History", "Marks": 84},
-    {"Name": "Robert Brown", "Course": "Economics", "Marks": 82}
+    {"Name": "Alice Johnson", "Subject": "Mathematics", "Obtained Marks": 95, "Total Marks": 100, "Percentage": 95.0},
+    {"Name": "David Martinez", "Subject": "Physics", "Obtained Marks": 92, "Total Marks": 100, "Percentage": 92.0},
+    {"Name": "Emma Thompson", "Subject": "Chemistry", "Obtained Marks": 89, "Total Marks": 100, "Percentage": 89.0},
+    {"Name": "Michael Chen", "Subject": "Biology", "Obtained Marks": 86, "Total Marks": 100, "Percentage": 86.0},
+    {"Name": "Sarah Williams", "Subject": "English", "Obtained Marks": 84, "Total Marks": 100, "Percentage": 84.0},
+    {"Name": "James Rodriguez", "Subject": "History", "Obtained Marks": 82, "Total Marks": 100, "Percentage": 82.0},
+    {"Name": "Sophia Kumar", "Subject": "Computer Science", "Obtained Marks": 80, "Total Marks": 100, "Percentage": 80.0},
+    {"Name": "Robert Brown", "Subject": "Economics", "Obtained Marks": 78, "Total Marks": 100, "Percentage": 78.0}
 ];
 
-// Template file URL
-const TEMPLATE_URL = 'https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/47d42ad63b85db28546c8556fe71e939/d9d2445f-ccde-44fc-84e3-f63f31a9a0fb/55aef6c4.xlsx';
+// Updated template URL
+const TEMPLATE_URL = 'https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/9ea9241e214f607036b115403f329b5b/98b39614-2f12-4d3b-bf34-2f6a1927042e/84f400ec.xlsx';
 
 // DOM Elements
 let uploadArea, fileInput, fileInfo, fileName, uploadSection, loadingContainer;
-let errorMessage, errorText, successMessage, successText, leaderboardSection, podium, studentList;
-let downloadBtn, demoBtn, resetBtn, templateDownloadBtn;
+let errorMessage, errorText, successMessage, successText, leaderboardSection, podium;
+let completeStudentList, downloadBtn, demoBtn, resetBtn, templateDownloadBtn;
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing premium leaderboard application...');
+    console.log('Initializing updated premium leaderboard application...');
     initializeDOMElements();
     setupEventListeners();
     addPremiumEffects();
@@ -44,7 +44,7 @@ function initializeDOMElements() {
     successText = document.getElementById('successText');
     leaderboardSection = document.getElementById('leaderboardSection');
     podium = document.getElementById('podium');
-    studentList = document.getElementById('studentList');
+    completeStudentList = document.getElementById('completeStudentList');
     downloadBtn = document.getElementById('downloadBtn');
     demoBtn = document.getElementById('demoBtn');
     resetBtn = document.getElementById('resetBtn');
@@ -60,7 +60,6 @@ function setupEventListeners() {
     // File input change
     if (fileInput) {
         fileInput.addEventListener('change', handleFileSelect);
-        console.log('File input listener added');
     }
     
     // Drag and drop events
@@ -69,9 +68,7 @@ function setupEventListeners() {
         uploadArea.addEventListener('dragleave', handleDragLeave);
         uploadArea.addEventListener('drop', handleFileDrop);
         uploadArea.addEventListener('click', function(e) {
-            console.log('Upload area clicked');
             if (e.target.classList.contains('upload-btn') || e.target.closest('.upload-btn')) {
-                console.log('Upload button clicked, opening file dialog');
                 if (fileInput) {
                     fileInput.click();
                 }
@@ -81,47 +78,38 @@ function setupEventListeners() {
                 fileInput.click();
             }
         });
-        console.log('Upload area listeners added');
     }
     
     // Template download button
     if (templateDownloadBtn) {
         templateDownloadBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Template download button clicked');
             downloadTemplate();
         });
-        console.log('Template download listener added');
     }
     
     // Download screenshot button
     if (downloadBtn) {
         downloadBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Screenshot download button clicked');
             downloadScreenshot();
         });
-        console.log('Screenshot download listener added');
     }
     
     // Demo button
     if (demoBtn) {
         demoBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Demo button clicked');
             loadPremiumDemo();
         });
-        console.log('Demo button listener added');
     }
 
     // Reset button
     if (resetBtn) {
         resetBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Reset button clicked');
             resetApplication();
         });
-        console.log('Reset button listener added');
     }
 }
 
@@ -129,17 +117,6 @@ function setupEventListeners() {
 function addPremiumEffects() {
     console.log('Adding premium effects...');
     
-    // Add parallax effect to background gradients
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const parallax = document.querySelectorAll('.bg-gradient-1, .bg-gradient-2, .bg-gradient-3');
-        
-        parallax.forEach((element, index) => {
-            const speed = 0.5 + (index * 0.1);
-            element.style.transform = `translateY(${scrolled * speed}px)`;
-        });
-    });
-
     // Add premium hover effects to buttons
     const premiumButtons = document.querySelectorAll('.btn--premium');
     premiumButtons.forEach(button => {
@@ -156,21 +133,17 @@ function addPremiumEffects() {
     if (uploadArea) {
         uploadArea.addEventListener('mouseenter', function() {
             this.style.transform = 'translateY(-5px)';
-            this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
         });
         
         uploadArea.addEventListener('mouseleave', function() {
             if (!this.classList.contains('dragover')) {
                 this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '';
             }
         });
     }
-    
-    console.log('Premium effects added');
 }
 
-// Download premium template
+// Download updated template
 function downloadTemplate() {
     console.log('Starting template download...');
     
@@ -186,82 +159,54 @@ function downloadTemplate() {
     }
 
     try {
-        // Create a temporary link to download the template
         const link = document.createElement('a');
         link.href = TEMPLATE_URL;
-        link.download = 'Premium_Student_Leaderboard_Template.xlsx';
+        link.download = 'Updated_Student_Leaderboard_Template.xlsx';
         link.target = '_blank';
         
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        // Show success message
-        showPremiumSuccess('Premium template downloaded successfully! 📊');
-        console.log('Template download initiated');
+        showPremiumSuccess('Updated template downloaded successfully! 📊');
     } catch (error) {
         console.error('Template download error:', error);
         showPremiumError('Error downloading template. Please try again! 🚫');
     }
 }
 
-// Reset application to initial state
+// Reset application
 function resetApplication() {
     console.log('Resetting application...');
     
-    // Clear data
     studentsData = [];
     isProcessing = false;
     
-    // Reset form
     if (fileInput) {
         fileInput.value = '';
     }
     
-    // Hide all sections except upload
     hideLoading();
     hideError();
     hideSuccess();
     if (leaderboardSection) leaderboardSection.classList.add('hidden');
     if (uploadSection) uploadSection.classList.remove('hidden');
     
-    // Clear file info
     if (fileInfo) fileInfo.classList.add('hidden');
     
-    // Smooth scroll to top with premium effect
     smoothScrollToTop();
 }
 
 // Premium smooth scroll
 function smoothScrollToTop() {
-    const startPosition = window.pageYOffset;
-    const startTime = performance.now();
-    const duration = 1000;
-
-    function scrollAnimation(currentTime) {
-        const elapsedTime = currentTime - startTime;
-        const progress = Math.min(elapsedTime / duration, 1);
-        
-        // Easing function for smooth animation
-        const ease = 1 - Math.pow(1 - progress, 3);
-        
-        window.scrollTo(0, startPosition * (1 - ease));
-        
-        if (progress < 1) {
-            requestAnimationFrame(scrollAnimation);
-        }
-    }
-    
-    requestAnimationFrame(scrollAnimation);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Handle drag over with premium effects
+// Handle drag over
 function handleDragOver(e) {
     e.preventDefault();
     if (uploadArea) {
         uploadArea.classList.add('dragover');
-        uploadArea.style.transform = 'translateY(-5px) scale(1.02)';
-        uploadArea.style.borderColor = 'rgba(59, 130, 246, 0.8)';
     }
 }
 
@@ -270,45 +215,34 @@ function handleDragLeave(e) {
     e.preventDefault();
     if (uploadArea) {
         uploadArea.classList.remove('dragover');
-        uploadArea.style.transform = 'translateY(0) scale(1)';
-        uploadArea.style.borderColor = '';
     }
 }
 
-// Handle file drop with premium animations
+// Handle file drop
 function handleFileDrop(e) {
     e.preventDefault();
-    console.log('File dropped');
     
     if (uploadArea) {
         uploadArea.classList.remove('dragover');
-        uploadArea.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            uploadArea.style.transform = 'scale(1)';
-        }, 200);
     }
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-        console.log('Processing dropped file:', files[0].name);
         handleFile(files[0]);
     }
 }
 
 // Handle file selection
 function handleFileSelect(e) {
-    console.log('File selected');
     const file = e.target.files[0];
     if (file) {
-        console.log('Processing selected file:', file.name);
         handleFile(file);
     }
 }
 
-// Handle file processing with premium validation
+// Handle file processing with validation
 function handleFile(file) {
     if (isProcessing) {
-        console.log('Already processing, ignoring new file');
         return;
     }
     
@@ -331,56 +265,44 @@ function handleFile(file) {
         return;
     }
     
-    // Show file info with premium animation
+    // Show file info
     if (fileName) {
         fileName.textContent = file.name;
     }
     if (fileInfo) {
         fileInfo.classList.remove('hidden');
-        fileInfo.style.animation = 'slideUp 0.5s ease-out';
     }
     
-    // Process the file
-    console.log('Starting file processing...');
     processExcelFile(file);
 }
 
-// Process Excel file with enhanced error handling
+// Process Excel file with updated data structure
 function processExcelFile(file) {
-    console.log('Processing Excel file...');
+    console.log('Processing Excel file with new structure...');
     showPremiumLoading();
     isProcessing = true;
     
     const reader = new FileReader();
     reader.onload = function(e) {
-        console.log('File loaded, parsing...');
-        
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             
-            // Get the first worksheet
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             
-            console.log('Worksheet loaded:', sheetName);
-            
-            // Convert to JSON
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
             console.log('Raw JSON data:', jsonData);
             
-            // Validate and process data
-            const processedData = validateAndProcessData(jsonData);
+            const processedData = validateAndProcessNewData(jsonData);
             console.log('Processed data:', processedData);
             
             if (processedData.length === 0) {
-                showPremiumError('No valid student data found. Please check your Excel file format and try our premium template! 📋');
+                showPremiumError('No valid student data found. Please check your Excel file format and try our updated template! 📋');
                 return;
             }
             
-            // Store and display data
             studentsData = processedData;
-            console.log('Students data stored, displaying leaderboard...');
             displayPremiumLeaderboard();
             
         } catch (error) {
@@ -402,38 +324,50 @@ function processExcelFile(file) {
     reader.readAsArrayBuffer(file);
 }
 
-// Enhanced data validation
-function validateAndProcessData(data) {
-    console.log('Validating data...');
+// Enhanced data validation for new structure
+function validateAndProcessNewData(data) {
+    console.log('Validating data with new structure...');
     const processed = [];
     
     data.forEach((row, index) => {
-        // Check for required columns (case-insensitive)
+        // Look for required columns (case-insensitive)
         const name = findColumnValue(row, ['name', 'student name', 'student_name', 'studentname']);
-        const course = findColumnValue(row, ['course', 'subject', 'class', 'stream', 'department']);
-        const marks = findColumnValue(row, ['marks', 'percentage', 'score', 'marks/percentage', 'total marks', 'grade']);
+        const subject = findColumnValue(row, ['subject', 'course', 'class', 'stream', 'department']);
+        const obtainedMarks = findColumnValue(row, ['obtained marks', 'obtained_marks', 'obtainedmarks', 'marks obtained', 'score']);
+        const totalMarks = findColumnValue(row, ['total marks', 'total_marks', 'totalmarks', 'max marks', 'maximum marks']);
+        let percentage = findColumnValue(row, ['percentage', 'percent', '%', 'marks percentage']);
         
-        if (name && course && marks !== null && marks !== undefined) {
-            let numericMarks = parseFloat(String(marks).replace(/[^\d.-]/g, ''));
+        if (name && subject && obtainedMarks !== null && totalMarks !== null) {
+            let numericObtained = parseFloat(String(obtainedMarks).replace(/[^\d.-]/g, ''));
+            let numericTotal = parseFloat(String(totalMarks).replace(/[^\d.-]/g, ''));
+            let numericPercentage = null;
             
-            // Handle percentage symbols and convert if needed
-            if (String(marks).includes('%')) {
-                numericMarks = parseFloat(String(marks).replace('%', ''));
+            // Calculate percentage if not provided or invalid
+            if (percentage === null || percentage === undefined || isNaN(parseFloat(String(percentage).replace(/[^\d.-]/g, '')))) {
+                if (!isNaN(numericObtained) && !isNaN(numericTotal) && numericTotal > 0) {
+                    numericPercentage = (numericObtained / numericTotal) * 100;
+                }
+            } else {
+                numericPercentage = parseFloat(String(percentage).replace(/[^\d.-]/g, ''));
             }
             
-            if (!isNaN(numericMarks) && numericMarks >= 0 && numericMarks <= 100) {
+            if (!isNaN(numericObtained) && !isNaN(numericTotal) && !isNaN(numericPercentage) && 
+                numericObtained >= 0 && numericTotal > 0 && numericPercentage >= 0 && numericPercentage <= 100) {
+                
                 processed.push({
                     name: String(name).trim(),
-                    course: String(course).trim(),
-                    marks: Math.round(numericMarks * 100) / 100, // Round to 2 decimal places
+                    subject: String(subject).trim(),
+                    obtainedMarks: Math.round(numericObtained * 100) / 100,
+                    totalMarks: Math.round(numericTotal * 100) / 100,
+                    percentage: Math.round(numericPercentage * 100) / 100,
                     originalIndex: index
                 });
             }
         }
     });
     
-    // Sort by marks in descending order
-    const sorted = processed.sort((a, b) => b.marks - a.marks);
+    // Sort by percentage in descending order
+    const sorted = processed.sort((a, b) => b.percentage - a.percentage);
     console.log('Processed and sorted data:', sorted);
     return sorted;
 }
@@ -458,28 +392,26 @@ function findColumnValue(row, possibleKeys) {
 
 // Load premium demo data
 function loadPremiumDemo() {
-    console.log('Loading premium demo...');
+    console.log('Loading premium demo with new data structure...');
     
     if (isProcessing) {
-        console.log('Already processing, ignoring demo request');
         return;
     }
     
     showPremiumLoading();
     isProcessing = true;
     
-    // Simulate processing time with premium loading
     setTimeout(() => {
         try {
-            console.log('Processing demo data...');
             studentsData = premiumSampleData.map((student, index) => ({
                 name: student.Name,
-                course: student.Course,
-                marks: student.Marks,
+                subject: student.Subject,
+                obtainedMarks: student["Obtained Marks"],
+                totalMarks: student["Total Marks"],
+                percentage: student.Percentage,
                 originalIndex: index
-            })).sort((a, b) => b.marks - a.marks);
+            })).sort((a, b) => b.percentage - a.percentage);
             
-            console.log('Demo data processed:', studentsData);
             displayPremiumLeaderboard();
         } catch (error) {
             console.error('Error loading demo data:', error);
@@ -491,57 +423,48 @@ function loadPremiumDemo() {
     }, 2000);
 }
 
-// Display premium leaderboard with animations
+// Display premium leaderboard with new structure
 function displayPremiumLeaderboard() {
     console.log('Displaying premium leaderboard with', studentsData.length, 'students');
     
     hideError();
     hideSuccess();
     
-    // Hide upload section and show leaderboard
     if (uploadSection) {
         uploadSection.classList.add('hidden');
-        console.log('Upload section hidden');
     }
     if (leaderboardSection) {
         leaderboardSection.classList.remove('hidden');
-        console.log('Leaderboard section shown');
     }
     
-    // Premium scroll to leaderboard
     setTimeout(() => {
         if (leaderboardSection) {
             leaderboardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            console.log('Scrolled to leaderboard');
         }
     }, 300);
     
     // Display top 3 in premium podium
     displayPremiumPodium();
     
-    // Display remaining students with staggered animation
-    displayRemainingStudents();
+    // Display ALL students in complete leaderboard
+    displayCompleteLeaderboard();
     
-    // Show success message
     showPremiumSuccess(`🎉 Premium leaderboard generated with ${studentsData.length} students!`);
 }
 
-// Display premium podium with 3D effects
+// Display premium podium with updated data structure
 function displayPremiumPodium() {
     console.log('Creating premium podium...');
     
     if (!podium) {
-        console.error('Podium element not found');
         return;
     }
     
     podium.innerHTML = '';
     
     const top3 = studentsData.slice(0, 3);
-    console.log('Top 3 students:', top3);
     
     if (top3.length === 0) {
-        console.log('No students for podium');
         return;
     }
     
@@ -549,16 +472,12 @@ function displayPremiumPodium() {
         { student: top3[1], position: 'second', rank: 2, icon: 'fas fa-medal', color: 'second' },
         { student: top3[0], position: 'first', rank: 1, icon: 'fas fa-crown', color: 'first' },   
         { student: top3[2], position: 'third', rank: 3, icon: 'fas fa-trophy', color: 'third' }
-    ].filter(item => item.student); // Only include positions with students
-    
-    console.log('Podium data:', podiumData);
+    ].filter(item => item.student);
     
     podiumData.forEach((item, index) => {
         const podiumPosition = createPremiumPodiumPosition(item.student, item.position, item.rank, item.icon, item.color);
         podium.appendChild(podiumPosition);
-        console.log(`Added podium position ${item.rank}`);
         
-        // Staggered premium animation
         setTimeout(() => {
             podiumPosition.classList.add('animate-slide-up');
             podiumPosition.style.transform = 'translateY(0) scale(1)';
@@ -567,7 +486,7 @@ function displayPremiumPodium() {
     });
 }
 
-// Create premium podium position with enhanced styling
+// Create premium podium position with updated data
 function createPremiumPodiumPosition(student, position, rank, icon, color) {
     const div = document.createElement('div');
     div.className = `podium-position podium-position--${position}`;
@@ -582,83 +501,71 @@ function createPremiumPodiumPosition(student, position, rank, icon, color) {
                 <i class="${icon}"></i>
             </div>
             <div class="podium-name">${student.name}</div>
-            <div class="podium-course">${student.course}</div>
-            <div class="podium-marks">${student.marks}%</div>
+            <div class="podium-subject">${student.subject}</div>
+            <div class="podium-percentage">${student.percentage}%</div>
+            <div class="podium-marks">${student.obtainedMarks}/${student.totalMarks}</div>
         </div>
     `;
     
-    console.log(`Created podium position for ${student.name}`);
     return div;
 }
 
-// Display remaining students with premium effects
-function displayRemainingStudents() {
-    console.log('Displaying remaining students...');
+// Display complete leaderboard (ALL students including top 3)
+function displayCompleteLeaderboard() {
+    console.log('Displaying complete leaderboard with ALL students...');
     
-    if (!studentList) {
-        console.error('Student list element not found');
+    if (!completeStudentList) {
         return;
     }
     
-    studentList.innerHTML = '';
+    completeStudentList.innerHTML = '';
     
-    const remainingStudents = studentsData.slice(3);
-    console.log('Remaining students:', remainingStudents.length);
-    
-    const remainingStudentsSection = document.querySelector('.remaining-students');
-    if (remainingStudents.length === 0) {
-        if (remainingStudentsSection) {
-            remainingStudentsSection.style.display = 'none';
-        }
-        console.log('No remaining students to display');
-        return;
-    }
-    
-    if (remainingStudentsSection) {
-        remainingStudentsSection.style.display = 'block';
-    }
-    
-    remainingStudents.forEach((student, index) => {
-        const rank = index + 4;
-        const studentCard = createPremiumStudentCard(student, rank);
-        studentList.appendChild(studentCard);
-        console.log(`Added student card for ${student.name} (rank ${rank})`);
+    // Display ALL students (including top 3)
+    studentsData.forEach((student, index) => {
+        const rank = index + 1;
+        const studentCard = createUpdatedStudentCard(student, rank);
+        completeStudentList.appendChild(studentCard);
         
         // Staggered animation
         setTimeout(() => {
             studentCard.classList.add('animate-slide-up');
             studentCard.style.transform = 'translateY(0) scale(1)';
             studentCard.style.opacity = '1';
-        }, (index * 150) + 1000);
+        }, (index * 100) + 1000);
     });
 }
 
-// Create premium student card
-function createPremiumStudentCard(student, rank) {
+// Create student card with updated data structure
+function createUpdatedStudentCard(student, rank) {
     const div = document.createElement('div');
     div.className = 'student-card';
     div.style.transform = 'translateY(30px) scale(0.95)';
     div.style.opacity = '0';
     div.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     
+    // Add special styling for top 3
+    if (rank <= 3) {
+        div.style.borderColor = rank === 1 ? '#ffd700' : rank === 2 ? '#c0c0c0' : '#cd7f32';
+        div.style.borderWidth = '3px';
+    }
+    
     div.innerHTML = `
         <div class="student-rank">${rank}</div>
         <div class="student-info">
             <h4>${student.name}</h4>
-            <p>${student.course}</p>
+            <p>${student.subject}</p>
         </div>
         <div class="student-marks">
-            <div class="marks">${student.marks}%</div>
-            <div class="percentage">Score</div>
+            <div class="percentage">${student.percentage}%</div>
+            <div class="marks">${student.obtainedMarks}/${student.totalMarks}</div>
         </div>
     `;
     
     return div;
 }
 
-// Premium loading state
+// Loading state
 function showPremiumLoading() {
-    console.log('Showing premium loading...');
     if (uploadSection) uploadSection.classList.add('hidden');
     if (errorMessage) errorMessage.classList.add('hidden');
     if (successMessage) successMessage.classList.add('hidden');
@@ -666,19 +573,15 @@ function showPremiumLoading() {
     if (loadingContainer) loadingContainer.classList.remove('hidden');
 }
 
-// Hide loading state
 function hideLoading() {
-    console.log('Hiding loading...');
     if (loadingContainer) loadingContainer.classList.add('hidden');
 }
 
-// Premium success message
+// Success message
 function showPremiumSuccess(message) {
-    console.log('Showing success:', message);
     if (successText) successText.textContent = message;
     if (successMessage) {
         successMessage.classList.remove('hidden');
-        successMessage.style.animation = 'messageSlide 0.5s ease-out';
     }
     
     setTimeout(() => {
@@ -686,19 +589,16 @@ function showPremiumSuccess(message) {
     }, 4000);
 }
 
-// Hide success message
 function hideSuccess() {
     if (successMessage) successMessage.classList.add('hidden');
 }
 
-// Premium error message
+// Error message
 function showPremiumError(message) {
-    console.log('Showing error:', message);
     hideLoading();
     if (errorText) errorText.textContent = message;
     if (errorMessage) {
         errorMessage.classList.remove('hidden');
-        errorMessage.style.animation = 'messageSlide 0.5s ease-out';
     }
     
     setTimeout(() => {
@@ -706,7 +606,6 @@ function showPremiumError(message) {
     }, 6000);
 }
 
-// Hide error message
 function hideError() {
     if (errorMessage) errorMessage.classList.add('hidden');
 }
@@ -726,7 +625,6 @@ function downloadScreenshot() {
         downloadBtn.disabled = true;
     }
     
-    // Create clean version for screenshot
     const leaderboardElement = document.getElementById('leaderboardSection');
     if (!leaderboardElement) {
         showPremiumError('Leaderboard not found. Please try again! 🚫');
@@ -743,10 +641,10 @@ function downloadScreenshot() {
     cleanElement.style.position = 'absolute';
     cleanElement.style.left = '-9999px';
     cleanElement.style.top = '0';
-    cleanElement.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)';
+    cleanElement.style.background = '#f8f9fa';
     cleanElement.style.padding = '60px';
     cleanElement.style.borderRadius = '20px';
-    cleanElement.style.border = '2px solid rgba(255, 255, 255, 0.1)';
+    cleanElement.style.border = '2px solid #007bff';
     document.body.appendChild(cleanElement);
     
     // Add title for screenshot
@@ -756,15 +654,13 @@ function downloadScreenshot() {
     title.style.marginBottom = '40px';
     title.style.fontSize = '2.5rem';
     title.style.fontWeight = '900';
-    title.style.background = 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)';
-    title.style.webkitBackgroundClip = 'text';
-    title.style.webkitTextFillColor = 'transparent';
+    title.style.color = '#ff1b1b';
     title.style.fontFamily = 'Inter, sans-serif';
+    title.style.textTransform = 'uppercase';
     cleanElement.insertBefore(title, cleanElement.firstChild);
     
-    // Capture premium screenshot
     html2canvas(cleanElement, {
-        backgroundColor: '#0f172a',
+        backgroundColor: '#f8f9fa',
         scale: 2,
         useCORS: true,
         allowTaint: true,
@@ -775,7 +671,7 @@ function downloadScreenshot() {
         
         const link = document.createElement('a');
         const timestamp = new Date().toISOString().slice(0, 10);
-        link.download = `Smart_Study_Classes_Premium_Toppers_${timestamp}.png`;
+        link.download = `Smart_Study_Classes_Toppers_${timestamp}.png`;
         link.href = canvas.toDataURL('image/png');
         
         document.body.appendChild(link);
@@ -783,7 +679,6 @@ function downloadScreenshot() {
         document.body.removeChild(link);
         
         showPremiumSuccess('🎉 Premium screenshot captured successfully!');
-        console.log('Screenshot captured and downloaded');
         
         if (downloadBtn) {
             downloadBtn.innerHTML = originalHTML;
@@ -805,11 +700,8 @@ function downloadScreenshot() {
     });
 }
 
-// Add premium interactions on window load
+// Add entrance animations on load
 window.addEventListener('load', function() {
-    console.log('Window loaded, adding entrance animations...');
-    
-    // Add premium entrance animations
     const headerElements = document.querySelectorAll('.header-content *');
     headerElements.forEach((element, index) => {
         element.style.opacity = '0';
@@ -821,12 +713,4 @@ window.addEventListener('load', function() {
             element.style.transform = 'translateY(0)';
         }, index * 200);
     });
-});
-
-// Premium resize handling
-window.addEventListener('resize', function() {
-    // Refresh premium effects on resize
-    if (studentsData.length > 0) {
-        console.log('Window resized, refreshing layout');
-    }
 });
