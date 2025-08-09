@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Study Classes Toppers - Leaderboard</title>
+    <title>Smart Study Classes Toppers - Student Leaderboard</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Source+Sans+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -12,70 +12,153 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Header with Theme Toggle -->
-        <header class="header">
-            <div class="header-content">
-                <div class="header-top">
+        <!-- Theme Toggle -->
+        <div class="theme-toggle-container">
+            <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+
+        <!-- Upload Page -->
+        <div class="upload-page" id="uploadPage">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
                     <div class="header-icon-container">
                         <i class="fas fa-trophy header-icon"></i>
                         <div class="icon-glow"></div>
                     </div>
-                    <div class="theme-toggle-container">
-                        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-                            <i class="fas fa-moon theme-icon"></i>
+                    <h1 class="header-title">SMART STUDY CLASSES</h1>
+                    <h2 class="header-subtitle">Student Leaderboard System</h2>
+                    <p class="header-description">Upload Excel file or enter PIN to view leaderboard</p>
+                </div>
+            </header>
+
+            <!-- PIN Entry Section -->
+            <section class="pin-section">
+                <div class="pin-container">
+                    <h3 class="pin-title">🔑 Access Existing Leaderboard</h3>
+                    <p class="pin-description">Enter the 6-digit PIN to view a shared leaderboard</p>
+                    <div class="pin-input-container">
+                        <input type="text" id="pinInput" class="pin-input" placeholder="Enter 6-digit PIN" maxlength="6" pattern="[0-9]{6}">
+                        <button class="btn btn--primary pin-submit-btn" id="pinSubmitBtn">
+                            <i class="fas fa-key"></i>
+                            <span>Access Leaderboard</span>
                         </button>
                     </div>
                 </div>
-                <h1 class="header-title">SMART STUDY CLASSES</h1>
-                <h2 class="header-subtitle">Student Leaderboard</h2>
-                <p class="header-description">Upload Excel file to generate beautiful leaderboard</p>
-            </div>
-        </header>
+            </section>
 
-        <!-- Template Download Section -->
-        <section class="template-section">
-            <div class="template-container glass-morphism">
-                <h3 class="template-title">📊 Excel Template</h3>
-                <p class="template-description">Download our template with updated column structure</p>
-                <button class="btn btn--premium template-download-btn" id="templateDownloadBtn">
-                    <i class="fas fa-download"></i>
-                    <span>Download Template</span>
-                    <div class="btn-shine"></div>
+            <!-- OR Divider -->
+            <div class="divider-section">
+                <div class="divider">
+                    <span class="divider-text">OR</span>
+                </div>
+            </div>
+
+            <!-- Template Download Section -->
+            <section class="template-section">
+                <div class="template-container">
+                    <h3 class="template-title">📊 Excel Template</h3>
+                    <p class="template-description">Download our template with proper column structure</p>
+                    <button class="btn btn--secondary template-download-btn" id="templateDownloadBtn">
+                        <i class="fas fa-download"></i>
+                        <span>Download Template</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-container">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon-container">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            </div>
+                            <h3 class="upload-title">Drop Excel File Here</h3>
+                            <p class="upload-description">Drag and drop your Excel file or click to browse</p>
+                            <p class="upload-format">Supports .xlsx and .xls files</p>
+                            <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" />
+                            <button class="btn btn--primary upload-btn" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-file-excel"></i>
+                                <span>Select File</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="file-info hidden" id="fileInfo">
+                        <i class="fas fa-check-circle file-check-icon"></i>
+                        <span id="fileName">File selected</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Demo Section -->
+            <div class="demo-section">
+                <button class="btn btn--outline demo-btn" id="demoBtn">
+                    <i class="fas fa-play"></i>
+                    <span>Try Demo</span>
                 </button>
             </div>
-        </section>
+        </div>
 
-        <!-- Upload Section -->
-        <section class="upload-section" id="uploadSection">
-            <div class="upload-container">
-                <div class="upload-area glass-morphism" id="uploadArea">
-                    <div class="upload-content">
-                        <div class="upload-icon-container">
-                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                            <div class="upload-icon-glow"></div>
-                        </div>
-                        <h3 class="upload-title">Drop Excel File Here</h3>
-                        <p class="upload-description">Drag and drop your Excel file or click to browse</p>
-                        <p class="upload-format">Supports .xlsx and .xls files</p>
-                        <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" />
-                        <button class="btn btn--premium upload-btn" onclick="document.getElementById('fileInput').click()">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Select File</span>
-                            <div class="btn-shine"></div>
+        <!-- Leaderboard Page -->
+        <div class="leaderboard-page hidden" id="leaderboardPage">
+            <!-- PIN Display Section -->
+            <section class="pin-display-section" id="pinDisplaySection">
+                <div class="pin-display-container">
+                    <h3 class="pin-display-title">📌 Share This Leaderboard</h3>
+                    <p class="pin-display-message">You can share this leaderboard by this 6 digit pin number</p>
+                    <div class="pin-display">
+                        <span class="pin-number" id="pinNumber">------</span>
+                        <button class="btn btn--secondary pin-copy-btn" id="pinCopyBtn">
+                            <i class="fas fa-copy"></i>
+                            <span>Copy PIN</span>
                         </button>
                     </div>
                 </div>
-                <div class="file-info glass-morphism hidden" id="fileInfo">
-                    <i class="fas fa-check-circle file-check-icon"></i>
-                    <span id="fileName">File selected</span>
+            </section>
+
+            <!-- Controls -->
+            <div class="leaderboard-controls">
+                <button class="btn btn--secondary back-btn" id="backBtn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Upload</span>
+                </button>
+                <button class="btn btn--primary download-btn" id="downloadBtn">
+                    <i class="fas fa-camera"></i>
+                    <span>Download Screenshot</span>
+                </button>
+            </div>
+
+            <!-- Top 3 Podium -->
+            <div class="podium-container">
+                <div class="podium-title">
+                    <h2 class="podium-header">🏆 Top Performers 🏆</h2>
+                    <p class="podium-subtitle">Excellence Recognized</p>
+                </div>
+                <div class="podium" id="podium">
+                    <!-- Podium positions will be populated by JavaScript -->
                 </div>
             </div>
-        </section>
+
+            <!-- Complete Leaderboard List -->
+            <div class="complete-leaderboard" id="completeLeaderboard">
+                <div class="complete-leaderboard-title">
+                    <h2 class="complete-header">📋 Complete Rankings 📋</h2>
+                    <p class="complete-subtitle">All Students - Ranked by Performance</p>
+                </div>
+                <div class="complete-student-list" id="completeStudentList">
+                    <!-- All student cards will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
 
         <!-- Loading State -->
         <div class="loading-container hidden" id="loadingContainer">
-            <div class="loading-content glass-morphism">
-                <div class="premium-spinner">
+            <div class="loading-content">
+                <div class="spinner">
                     <div class="spinner-ring"></div>
                     <div class="spinner-ring"></div>
                     <div class="spinner-ring"></div>
@@ -86,7 +169,7 @@
 
         <!-- Error Message -->
         <div class="message-container error-message hidden" id="errorMessage">
-            <div class="message-content glass-morphism">
+            <div class="message-content">
                 <i class="fas fa-exclamation-triangle message-icon"></i>
                 <span id="errorText"></span>
             </div>
@@ -94,63 +177,10 @@
 
         <!-- Success Message -->
         <div class="message-container success-message hidden" id="successMessage">
-            <div class="message-content glass-morphism">
+            <div class="message-content">
                 <i class="fas fa-check-circle message-icon"></i>
                 <span id="successText"></span>
             </div>
-        </div>
-
-        <!-- Leaderboard Section -->
-        <section class="leaderboard-section hidden" id="leaderboardSection">
-            <!-- Controls -->
-            <div class="leaderboard-controls">
-                <button class="btn btn--secondary reset-btn" id="resetBtn">
-                    <i class="fas fa-upload"></i>
-                    <span>Upload New File</span>
-                </button>
-            </div>
-
-            <!-- Capture Area for Screenshot -->
-            <div class="leaderboard-capture-area" id="leaderboardCaptureArea">
-                <!-- Top 3 Premium Podium -->
-                <div class="podium-container">
-                    <div class="podium-title">
-                        <h2 class="podium-header">Smart Study Classes</h2>
-                        <p class="podium-subtitle">Top Performers </p>
-                    </div>
-                    <div class="podium glass-morphism" id="podium">
-                        <!-- Podium positions will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Complete Leaderboard List -->
-                <div class="complete-leaderboard" id="completeLeaderboard">
-                    <div class="complete-leaderboard-title">
-                        <h2 class="complete-header">📋 Students Leaderboard Rankings 📋</h2>
-                        <p class="complete-subtitle">All Students - Ranked by Performance</p>
-                    </div>
-                    <div class="complete-student-list" id="completeStudentList">
-                        <!-- All student cards will be populated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Download Button -->
-            <div class="download-section">
-                <button class="btn btn--premium btn--large download-btn" id="downloadBtn">
-                    <i class="fas fa-camera"></i>
-                    <span>Capture Screenshot</span>
-                    <div class="btn-shine"></div>
-                </button>
-            </div>
-        </section>
-
-        <!-- Demo Section -->
-        <div class="demo-section">
-            <button class="btn btn--outline demo-btn" id="demoBtn">
-                <i class="fas fa-play"></i>
-                <span>Try Demo</span>
-            </button>
         </div>
     </div>
 

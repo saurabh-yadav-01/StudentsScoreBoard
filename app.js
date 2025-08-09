@@ -1,10 +1,10 @@
-// Fixed Premium Student Leaderboard Application with Theme Toggle and Screenshot Fixes
+// Student Leaderboard System with PIN Database
 let studentsData = [];
+let currentPin = null;
 let isProcessing = false;
-let currentTheme = 'light';
 
-// Updated sample data with new structure
-const premiumSampleData = [
+// Sample data for demo
+const sampleData = [
     {"Name": "Alice Johnson", "Subject": "Mathematics", "Obtained Marks": 95, "Total Marks": 100, "Percentage": 95.0},
     {"Name": "David Martinez", "Subject": "Physics", "Obtained Marks": 92, "Total Marks": 100, "Percentage": 92.0},
     {"Name": "Emma Thompson", "Subject": "Chemistry", "Obtained Marks": 89, "Total Marks": 100, "Percentage": 89.0},
@@ -15,117 +15,112 @@ const premiumSampleData = [
     {"Name": "Robert Brown", "Subject": "Economics", "Obtained Marks": 78, "Total Marks": 100, "Percentage": 78.0}
 ];
 
-// DOM Elements
-let uploadArea, fileInput, fileInfo, fileName, uploadSection, loadingContainer;
-let errorMessage, errorText, successMessage, successText, leaderboardSection, podium;
-let completeStudentList, downloadBtn, demoBtn, resetBtn, templateDownloadBtn, themeToggle;
+// Template URL
+const TEMPLATE_URL = 'https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/ba03d0ecb021d36f55ea4614103e9b73/83d30eda-35e0-4d5c-9c8e-c064f41916b0/5000eaf4.xlsx';
 
-// Initialize the application
+// DOM Elements
+let uploadPage, leaderboardPage, uploadArea, fileInput, fileInfo, fileName;
+let loadingContainer, errorMessage, errorText, successMessage, successText;
+let podium, completeStudentList, downloadBtn, demoBtn, backBtn;
+let templateDownloadBtn, pinInput, pinSubmitBtn, pinDisplaySection, pinNumber, pinCopyBtn;
+let themeToggleBtn;
+
+// Initialize the application immediately
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing updated premium leaderboard application with theme toggle...');
+    console.log('DOM loaded - initializing application...');
+    
+    // Initialize DOM elements first
     initializeDOMElements();
-    initializeTheme();
+    
+    // Set proper initial state immediately
+    setInitialState();
+    
+    // Setup event listeners
     setupEventListeners();
-    addPremiumEffects();
+    
+    // Initialize theme
+    initializeTheme();
+    
+    // Load demo data for PIN access
+    loadStoredDemo();
+    
+    console.log('Application initialized successfully');
 });
+
+// Set initial application state immediately
+function setInitialState() {
+    console.log('Setting initial application state...');
+    
+    // Ensure upload page is visible and others are hidden
+    if (uploadPage) {
+        uploadPage.classList.remove('hidden');
+        uploadPage.style.display = '';
+    }
+    
+    if (leaderboardPage) {
+        leaderboardPage.classList.add('hidden');
+    }
+    
+    // CRITICAL: Hide loading container immediately
+    if (loadingContainer) {
+        loadingContainer.classList.add('hidden');
+        loadingContainer.style.display = 'none';
+    }
+    
+    // Hide messages
+    if (errorMessage) {
+        errorMessage.classList.add('hidden');
+    }
+    
+    if (successMessage) {
+        successMessage.classList.add('hidden');
+    }
+    
+    // Hide PIN display initially
+    if (pinDisplaySection) {
+        pinDisplaySection.classList.add('hidden');
+    }
+    
+    // Hide file info initially
+    if (fileInfo) {
+        fileInfo.classList.add('hidden');
+    }
+    
+    console.log('Initial state set - upload page visible, loading hidden');
+}
 
 // Initialize DOM elements
 function initializeDOMElements() {
+    uploadPage = document.getElementById('uploadPage');
+    leaderboardPage = document.getElementById('leaderboardPage');
     uploadArea = document.getElementById('uploadArea');
     fileInput = document.getElementById('fileInput');
     fileInfo = document.getElementById('fileInfo');
     fileName = document.getElementById('fileName');
-    uploadSection = document.getElementById('uploadSection');
     loadingContainer = document.getElementById('loadingContainer');
     errorMessage = document.getElementById('errorMessage');
     errorText = document.getElementById('errorText');
     successMessage = document.getElementById('successMessage');
     successText = document.getElementById('successText');
-    leaderboardSection = document.getElementById('leaderboardSection');
     podium = document.getElementById('podium');
     completeStudentList = document.getElementById('completeStudentList');
     downloadBtn = document.getElementById('downloadBtn');
     demoBtn = document.getElementById('demoBtn');
-    resetBtn = document.getElementById('resetBtn');
+    backBtn = document.getElementById('backBtn');
     templateDownloadBtn = document.getElementById('templateDownloadBtn');
-    themeToggle = document.getElementById('themeToggle');
+    pinInput = document.getElementById('pinInput');
+    pinSubmitBtn = document.getElementById('pinSubmitBtn');
+    pinDisplaySection = document.getElementById('pinDisplaySection');
+    pinNumber = document.getElementById('pinNumber');
+    pinCopyBtn = document.getElementById('pinCopyBtn');
+    themeToggleBtn = document.getElementById('themeToggleBtn');
     
-    console.log('DOM elements initialized');
-}
-
-// Initialize theme system
-function initializeTheme() {
-    console.log('Initializing theme system...');
-    
-    // Load saved theme or default to light
-    const savedTheme = localStorage.getItem('leaderboard-theme') || 'light';
-    currentTheme = savedTheme;
-    
-    // Apply theme
-    applyTheme(currentTheme);
-    updateThemeToggleIcon();
-}
-
-// Apply theme to document
-function applyTheme(theme) {
-    console.log('Applying theme:', theme);
-    
-    // Apply theme data attribute
-    document.documentElement.setAttribute('data-theme', theme);
-    
-    // Store theme preference
-    localStorage.setItem('leaderboard-theme', theme);
-    currentTheme = theme;
-    
-    console.log('Theme applied successfully:', theme);
-}
-
-// Update theme toggle icon
-function updateThemeToggleIcon() {
-    if (themeToggle) {
-        const icon = themeToggle.querySelector('.theme-icon');
-        if (icon) {
-            if (currentTheme === 'dark') {
-                icon.className = 'fas fa-sun theme-icon';
-                themeToggle.setAttribute('aria-label', 'Switch to light theme');
-            } else {
-                icon.className = 'fas fa-moon theme-icon';
-                themeToggle.setAttribute('aria-label', 'Switch to dark theme');
-            }
-        }
-    }
-}
-
-// Toggle theme
-function toggleTheme() {
-    console.log('Toggling theme from:', currentTheme);
-    
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    applyTheme(newTheme);
-    updateThemeToggleIcon();
-    
-    console.log('Theme toggled to:', newTheme);
-    
-    // Add button animation
-    if (themeToggle) {
-        themeToggle.style.transform = 'rotate(180deg) scale(0.9)';
-        setTimeout(() => {
-            themeToggle.style.transform = '';
-        }, 300);
-    }
+    console.log('DOM elements found and assigned');
 }
 
 // Setup all event listeners
 function setupEventListeners() {
     console.log('Setting up event listeners...');
-    
-    // Theme toggle button
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            toggleTheme();
-        });
-    }
     
     // File input change
     if (fileInput) {
@@ -145,6 +140,39 @@ function setupEventListeners() {
                 fileInput.click();
             }
         });
+    }
+    
+    // PIN input and submission
+    if (pinInput) {
+        pinInput.addEventListener('input', function(e) {
+            // Only allow numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            
+            if (e.target.value.length === 6) {
+                if (pinSubmitBtn) {
+                    pinSubmitBtn.style.opacity = '1';
+                    pinSubmitBtn.disabled = false;
+                }
+            } else {
+                if (pinSubmitBtn) {
+                    pinSubmitBtn.style.opacity = '0.5';
+                    pinSubmitBtn.disabled = true;
+                }
+            }
+        });
+        
+        pinInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.value.length === 6) {
+                handlePinSubmit();
+            }
+        });
+    }
+    
+    // PIN submit button
+    if (pinSubmitBtn) {
+        pinSubmitBtn.addEventListener('click', handlePinSubmit);
+        pinSubmitBtn.disabled = true;
+        pinSubmitBtn.style.opacity = '0.5';
     }
     
     // Template download button
@@ -167,96 +195,267 @@ function setupEventListeners() {
     if (demoBtn) {
         demoBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            loadPremiumDemo();
+            loadDemo();
         });
     }
 
-    // Reset button
-    if (resetBtn) {
-        resetBtn.addEventListener('click', function(e) {
+    // Back button
+    if (backBtn) {
+        backBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            resetApplication();
+            showUploadPage();
+        });
+    }
+    
+    // PIN copy button
+    if (pinCopyBtn) {
+        pinCopyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            copyPin();
+        });
+    }
+    
+    // Theme toggle
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleTheme();
         });
     }
     
     console.log('Event listeners set up successfully');
 }
 
-// Add premium effects and animations
-function addPremiumEffects() {
-    console.log('Adding premium effects...');
-    
-    // Add premium hover effects to buttons
-    const premiumButtons = document.querySelectorAll('.btn--premium');
-    premiumButtons.forEach(button => {
-        button.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-3px) scale(1.02)';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-}
-
-// Download template
-function downloadTemplate() {
-    console.log('Starting template download...');
-    
-    if (templateDownloadBtn) {
-        const originalHTML = templateDownloadBtn.innerHTML;
-        templateDownloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Downloading...</span>';
-        templateDownloadBtn.disabled = true;
-        
-        setTimeout(() => {
-            templateDownloadBtn.innerHTML = originalHTML;
-            templateDownloadBtn.disabled = false;
-            showPremiumSuccess('Template download completed! 📊');
-        }, 1500);
-    }
-    
-    // Create a simple Excel template data
-    const templateData = [
-        ['Name', 'Subject', 'Obtained Marks', 'Total Marks', 'Percentage'],
-        ['Alice Johnson', 'Mathematics', 95, 100, 95],
-        ['David Martinez', 'Physics', 92, 100, 92],
-        ['Emma Thompson', 'Chemistry', 89, 100, 89]
-    ];
-    
-    // Create and download template
+// Theme Management
+function initializeTheme() {
     try {
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(templateData);
-        XLSX.utils.book_append_sheet(wb, ws, 'Student Data');
-        XLSX.writeFile(wb, 'Student_Leaderboard_Template.xlsx');
+        const savedTheme = localStorage.getItem('leaderboard-theme') || 'light';
+        document.documentElement.setAttribute('data-color-scheme', savedTheme);
+        console.log('Theme initialized:', savedTheme);
     } catch (error) {
-        console.error('Template creation error:', error);
-        showPremiumSuccess('Template download initiated! 📊');
+        console.warn('Could not initialize theme:', error);
+        document.documentElement.setAttribute('data-color-scheme', 'light');
     }
 }
 
-// Reset application
-function resetApplication() {
-    console.log('Resetting application...');
+function toggleTheme() {
+    try {
+        const currentTheme = document.documentElement.getAttribute('data-color-scheme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-color-scheme', newTheme);
+        localStorage.setItem('leaderboard-theme', newTheme);
+        console.log('Theme toggled to:', newTheme);
+    } catch (error) {
+        console.warn('Could not toggle theme:', error);
+    }
+}
+
+// Database Simulation using LocalStorage
+function generatePin() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function saveLeaderboardToDB(pin, data) {
+    try {
+        const leaderboard = {
+            pin: pin,
+            title: 'Smart Study Classes Toppers',
+            students: data,
+            created_at: new Date().toISOString()
+        };
+        
+        localStorage.setItem(`leaderboard_${pin}`, JSON.stringify(leaderboard));
+        
+        // Also save to index for easy retrieval
+        const index = JSON.parse(localStorage.getItem('leaderboard_index') || '[]');
+        if (!index.includes(pin)) {
+            index.push(pin);
+            localStorage.setItem('leaderboard_index', JSON.stringify(index));
+        }
+        
+        console.log('Leaderboard saved to database with PIN:', pin);
+        return leaderboard;
+    } catch (error) {
+        console.error('Error saving to database:', error);
+        return null;
+    }
+}
+
+function getLeaderboardFromDB(pin) {
+    try {
+        const data = localStorage.getItem(`leaderboard_${pin}`);
+        return data ? JSON.parse(data) : null;
+    } catch (error) {
+        console.error('Error retrieving from database:', error);
+        return null;
+    }
+}
+
+// Load stored demo data if available
+function loadStoredDemo() {
+    try {
+        const demoPins = ['123456', '654321', '111111'];
+        demoPins.forEach(pin => {
+            if (!getLeaderboardFromDB(pin)) {
+                const processedData = sampleData.map((student, index) => ({
+                    name: student.Name,
+                    subject: student.Subject,
+                    obtainedMarks: student["Obtained Marks"],
+                    totalMarks: student["Total Marks"],
+                    percentage: student.Percentage,
+                    originalIndex: index
+                })).sort((a, b) => b.percentage - a.percentage);
+                
+                saveLeaderboardToDB(pin, processedData);
+            }
+        });
+        console.log('Demo data loaded successfully');
+    } catch (error) {
+        console.warn('Could not load demo data:', error);
+    }
+}
+
+// PIN Handling
+function handlePinSubmit() {
+    const pin = pinInput ? pinInput.value.trim() : '';
     
-    studentsData = [];
-    isProcessing = false;
-    
-    if (fileInput) {
-        fileInput.value = '';
+    if (pin.length !== 6) {
+        showError('Please enter a valid 6-digit PIN');
+        return;
     }
     
-    hideLoading();
-    hideError();
-    hideSuccess();
-    if (leaderboardSection) leaderboardSection.classList.add('hidden');
-    if (uploadSection) uploadSection.classList.remove('hidden');
-    if (fileInfo) fileInfo.classList.add('hidden');
+    console.log('Submitting PIN:', pin);
+    showLoading();
     
+    setTimeout(() => {
+        try {
+            const leaderboard = getLeaderboardFromDB(pin);
+            
+            if (leaderboard && leaderboard.students) {
+                studentsData = leaderboard.students;
+                currentPin = pin;
+                hideLoading();
+                showLeaderboardPage();
+                showSuccess(`Leaderboard loaded successfully! PIN: ${pin}`);
+                console.log('PIN validation successful');
+            } else {
+                hideLoading();
+                showError('Invalid PIN. Please check and try again.');
+                console.log('PIN validation failed');
+            }
+        } catch (error) {
+            console.error('Error validating PIN:', error);
+            hideLoading();
+            showError('Error accessing leaderboard. Please try again.');
+        }
+    }, 1500);
+}
+
+function copyPin() {
+    if (!currentPin) {
+        showError('No PIN to copy');
+        return;
+    }
+    
+    try {
+        navigator.clipboard.writeText(currentPin).then(() => {
+            const originalHTML = pinCopyBtn.innerHTML;
+            pinCopyBtn.innerHTML = '<i class="fas fa-check"></i> <span>Copied!</span>';
+            pinCopyBtn.style.background = 'var(--color-success)';
+            
+            setTimeout(() => {
+                pinCopyBtn.innerHTML = originalHTML;
+                pinCopyBtn.style.background = '';
+            }, 2000);
+        }).catch(() => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = currentPin;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            showSuccess('PIN copied to clipboard!');
+        });
+    } catch (error) {
+        console.error('Error copying PIN:', error);
+        showError('Failed to copy PIN');
+    }
+}
+
+// Page Navigation
+function showUploadPage() {
+    console.log('Showing upload page');
+    
+    if (uploadPage) uploadPage.classList.remove('hidden');
+    if (leaderboardPage) leaderboardPage.classList.add('hidden');
+    
+    // Reset form
+    if (pinInput) pinInput.value = '';
+    if (fileInput) fileInput.value = '';
+    if (fileInfo) fileInfo.classList.add('hidden');
+    if (pinSubmitBtn) {
+        pinSubmitBtn.disabled = true;
+        pinSubmitBtn.style.opacity = '0.5';
+    }
+    
+    currentPin = null;
+    studentsData = [];
+    
+    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Handle drag over
+function showLeaderboardPage() {
+    console.log('Showing leaderboard page');
+    
+    if (uploadPage) uploadPage.classList.add('hidden');
+    if (leaderboardPage) leaderboardPage.classList.remove('hidden');
+    
+    displayLeaderboard();
+    
+    setTimeout(() => {
+        if (leaderboardPage) {
+            leaderboardPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 300);
+}
+
+// Template Download
+function downloadTemplate() {
+    console.log('Downloading template...');
+    
+    if (!templateDownloadBtn) return;
+    
+    const originalHTML = templateDownloadBtn.innerHTML;
+    templateDownloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Downloading...</span>';
+    templateDownloadBtn.disabled = true;
+    
+    setTimeout(() => {
+        templateDownloadBtn.innerHTML = originalHTML;
+        templateDownloadBtn.disabled = false;
+    }, 2000);
+
+    try {
+        const link = document.createElement('a');
+        link.href = TEMPLATE_URL;
+        link.download = 'Student_Leaderboard_Template.xlsx';
+        link.target = '_blank';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showSuccess('Template downloaded successfully! 📊');
+    } catch (error) {
+        console.error('Template download error:', error);
+        showError('Error downloading template. Please try again!');
+    }
+}
+
+// Drag and Drop Handling
 function handleDragOver(e) {
     e.preventDefault();
     if (uploadArea) {
@@ -264,7 +463,6 @@ function handleDragOver(e) {
     }
 }
 
-// Handle drag leave
 function handleDragLeave(e) {
     e.preventDefault();
     if (uploadArea) {
@@ -272,19 +470,19 @@ function handleDragLeave(e) {
     }
 }
 
-// Handle file drop
 function handleFileDrop(e) {
     e.preventDefault();
+    
     if (uploadArea) {
         uploadArea.classList.remove('dragover');
     }
+    
     const files = e.dataTransfer.files;
     if (files.length > 0) {
         handleFile(files[0]);
     }
 }
 
-// Handle file selection
 function handleFileSelect(e) {
     const file = e.target.files[0];
     if (file) {
@@ -292,11 +490,11 @@ function handleFileSelect(e) {
     }
 }
 
-// Handle file processing
+// File Processing
 function handleFile(file) {
     if (isProcessing) return;
     
-    console.log('Validating file:', file.name);
+    console.log('Processing file:', file.name);
     
     // Validate file type
     const validTypes = [
@@ -305,13 +503,13 @@ function handleFile(file) {
     ];
     
     if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
-        showPremiumError('Please select a valid Excel file (.xlsx or .xls) 📋');
+        showError('Please select a valid Excel file (.xlsx or .xls)');
         return;
     }
 
-    // Validate file size
+    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-        showPremiumError('File size too large. Please select a file smaller than 10MB 📏');
+        showError('File size too large. Please select a file smaller than 10MB');
         return;
     }
     
@@ -322,10 +520,9 @@ function handleFile(file) {
     processExcelFile(file);
 }
 
-// Process Excel file
 function processExcelFile(file) {
     console.log('Processing Excel file...');
-    showPremiumLoading();
+    showLoading();
     isProcessing = true;
     
     const reader = new FileReader();
@@ -333,37 +530,60 @@ function processExcelFile(file) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
+            
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
+            
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            console.log('Raw JSON data:', jsonData);
             
             const processedData = validateAndProcessData(jsonData);
+            console.log('Processed data:', processedData);
             
             if (processedData.length === 0) {
-                showPremiumError('No valid student data found. Please check your Excel file format! 📋');
-                isProcessing = false;
                 hideLoading();
+                showError('No valid student data found. Please check your Excel file format and try our template!');
+                isProcessing = false;
                 return;
             }
             
             studentsData = processedData;
-            displayPremiumLeaderboard();
+            
+            // Generate PIN and save to database
+            currentPin = generatePin();
+            const saved = saveLeaderboardToDB(currentPin, studentsData);
+            
+            hideLoading();
+            isProcessing = false;
+            
+            if (saved) {
+                showLeaderboardPage();
+                showSuccess(`Leaderboard created successfully! PIN: ${currentPin}`);
+            } else {
+                showError('Error saving leaderboard. Please try again.');
+            }
             
         } catch (error) {
             console.error('Error processing file:', error);
-            showPremiumError('Error reading the Excel file. Please ensure it\'s a valid format! 🚫');
-        } finally {
             hideLoading();
             isProcessing = false;
+            showError('Error reading the Excel file. Please ensure it\'s a valid Excel format!');
         }
+    };
+    
+    reader.onerror = function(error) {
+        console.error('FileReader error:', error);
+        hideLoading();
+        isProcessing = false;
+        showError('Error reading the file. Please try again!');
     };
     
     reader.readAsArrayBuffer(file);
 }
 
-// Validate and process data
+// Data Validation and Processing
 function validateAndProcessData(data) {
-    console.log('Validating data...');
+    console.log('Validating and processing data...');
     const processed = [];
     
     data.forEach((row, index) => {
@@ -378,6 +598,7 @@ function validateAndProcessData(data) {
             let numericTotal = parseFloat(String(totalMarks).replace(/[^\d.-]/g, ''));
             let numericPercentage = null;
             
+            // Calculate percentage if not provided or invalid
             if (percentage === null || percentage === undefined || isNaN(parseFloat(String(percentage).replace(/[^\d.-]/g, '')))) {
                 if (!isNaN(numericObtained) && !isNaN(numericTotal) && numericTotal > 0) {
                     numericPercentage = (numericObtained / numericTotal) * 100;
@@ -401,36 +622,39 @@ function validateAndProcessData(data) {
         }
     });
     
+    // Sort by percentage in descending order
     return processed.sort((a, b) => b.percentage - a.percentage);
 }
 
-// Find column value with flexible names
 function findColumnValue(row, possibleKeys) {
     const keys = Object.keys(row);
+    
     for (const possibleKey of possibleKeys) {
         const foundKey = keys.find(key => 
             key.toLowerCase().replace(/[^a-z0-9]/g, '') === 
             possibleKey.toLowerCase().replace(/[^a-z0-9]/g, '')
         );
+        
         if (foundKey && row[foundKey] !== null && row[foundKey] !== undefined && row[foundKey] !== '') {
             return row[foundKey];
         }
     }
+    
     return null;
 }
 
-// Load premium demo data
-function loadPremiumDemo() {
-    console.log('Loading premium demo...');
+// Demo Data Loading
+function loadDemo() {
+    console.log('Loading demo data...');
     
     if (isProcessing) return;
     
-    showPremiumLoading();
+    showLoading();
     isProcessing = true;
     
     setTimeout(() => {
         try {
-            studentsData = premiumSampleData.map((student, index) => ({
+            studentsData = sampleData.map((student, index) => ({
                 name: student.Name,
                 subject: student.Subject,
                 obtainedMarks: student["Obtained Marks"],
@@ -439,70 +663,78 @@ function loadPremiumDemo() {
                 originalIndex: index
             })).sort((a, b) => b.percentage - a.percentage);
             
-            console.log('Demo data loaded:', studentsData);
-            displayPremiumLeaderboard();
+            // Generate PIN and save demo data
+            currentPin = generatePin();
+            const saved = saveLeaderboardToDB(currentPin, studentsData);
             
-        } catch (error) {
-            console.error('Error loading demo data:', error);
-            showPremiumError('Error loading demo data. Please try again! 🚫');
-        } finally {
             hideLoading();
             isProcessing = false;
+            
+            if (saved) {
+                showLeaderboardPage();
+                showSuccess(`Demo leaderboard loaded! PIN: ${currentPin}`);
+            } else {
+                showError('Error loading demo. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error loading demo data:', error);
+            hideLoading();
+            isProcessing = false;
+            showError('Error loading demo data. Please try again!');
         }
-    }, 1500);
+    }, 2000);
 }
 
-// Display premium leaderboard
-function displayPremiumLeaderboard() {
-    console.log('Displaying premium leaderboard with', studentsData.length, 'students');
+// Leaderboard Display
+function displayLeaderboard() {
+    console.log('Displaying leaderboard with', studentsData.length, 'students');
     
-    hideError();
-    hideSuccess();
+    // Update PIN display
+    if (currentPin && pinNumber) {
+        pinNumber.textContent = currentPin;
+        if (pinDisplaySection) pinDisplaySection.classList.remove('hidden');
+    }
     
-    if (uploadSection) uploadSection.classList.add('hidden');
-    if (leaderboardSection) leaderboardSection.classList.remove('hidden');
+    // Display top 3 podium
+    displayPodium();
     
-    displayPremiumPodium();
+    // Display complete leaderboard
     displayCompleteLeaderboard();
-    
-    setTimeout(() => {
-        if (leaderboardSection) {
-            leaderboardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        showPremiumSuccess(`🎉 Premium leaderboard generated with ${studentsData.length} students!`);
-    }, 500);
 }
 
-// Display premium podium
-function displayPremiumPodium() {
-    console.log('Creating premium podium...');
+// Mobile-Responsive Podium with Fixed Order
+function displayPodium() {
+    console.log('Creating podium...');
     
     if (!podium) return;
+    
     podium.innerHTML = '';
     
     const top3 = studentsData.slice(0, 3);
     if (top3.length === 0) return;
     
-    const podiumData = [
-        { student: top3[1], position: 'second', rank: 2, icon: 'fas fa-medal', color: 'second' },
-        { student: top3[0], position: 'first', rank: 1, icon: 'fas fa-crown', color: 'first' },   
-        { student: top3[2], position: 'third', rank: 3, icon: 'fas fa-trophy', color: 'third' }
-    ].filter(item => item.student);
+    // Create podium positions with correct ordering
+    // Desktop: 2nd, 1st, 3rd (visual left-center-right)
+    // Mobile: 1st, 2nd, 3rd (stacked vertically with 1st on top/center)
+    const podiumData = [];
+    
+    if (top3[1]) podiumData.push({ student: top3[1], position: 'second', rank: 2, icon: 'fas fa-medal', color: 'second' });
+    if (top3[0]) podiumData.push({ student: top3[0], position: 'first', rank: 1, icon: 'fas fa-crown', color: 'first' });
+    if (top3[2]) podiumData.push({ student: top3[2], position: 'third', rank: 3, icon: 'fas fa-trophy', color: 'third' });
     
     podiumData.forEach((item, index) => {
-        const podiumPosition = createPremiumPodiumPosition(item.student, item.position, item.rank, item.icon, item.color);
+        const podiumPosition = createPodiumPosition(item.student, item.position, item.rank, item.icon, item.color);
         podium.appendChild(podiumPosition);
         
+        // Staggered animation
         setTimeout(() => {
-            podiumPosition.classList.add('animate-slide-up');
             podiumPosition.style.transform = 'translateY(0) scale(1)';
             podiumPosition.style.opacity = '1';
-        }, index * 200);
+        }, index * 300);
     });
 }
 
-// Create podium position
-function createPremiumPodiumPosition(student, position, rank, icon, color) {
+function createPodiumPosition(student, position, rank, icon, color) {
     const div = document.createElement('div');
     div.className = `podium-position podium-position--${position}`;
     div.style.transform = 'translateY(50px) scale(0.8)';
@@ -525,11 +757,12 @@ function createPremiumPodiumPosition(student, position, rank, icon, color) {
     return div;
 }
 
-// Display complete leaderboard
+// Complete Leaderboard Display
 function displayCompleteLeaderboard() {
     console.log('Displaying complete leaderboard...');
     
     if (!completeStudentList) return;
+    
     completeStudentList.innerHTML = '';
     
     studentsData.forEach((student, index) => {
@@ -537,15 +770,14 @@ function displayCompleteLeaderboard() {
         const studentCard = createStudentCard(student, rank);
         completeStudentList.appendChild(studentCard);
         
+        // Staggered animation
         setTimeout(() => {
-            studentCard.classList.add('animate-slide-up');
             studentCard.style.transform = 'translateY(0) scale(1)';
             studentCard.style.opacity = '1';
-        }, (index * 50) + 500);
+        }, (index * 100) + 1000);
     });
 }
 
-// Create student card
 function createStudentCard(student, rank) {
     const div = document.createElement('div');
     div.className = 'student-card';
@@ -553,9 +785,12 @@ function createStudentCard(student, rank) {
     div.style.opacity = '0';
     div.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     
+    // Special styling for top 3
     if (rank <= 3) {
-        div.style.borderColor = rank === 1 ? '#ffd700' : rank === 2 ? '#c0c0c0' : '#cd7f32';
+        const colors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+        div.style.borderColor = colors[rank - 1];
         div.style.borderWidth = '3px';
+        div.style.boxShadow = `0 8px 25px ${colors[rank - 1]}40`;
     }
     
     div.innerHTML = `
@@ -573,146 +808,167 @@ function createStudentCard(student, rank) {
     return div;
 }
 
-// Loading functions
-function showPremiumLoading() {
-    if (uploadSection) uploadSection.classList.add('hidden');
-    if (errorMessage) errorMessage.classList.add('hidden');
-    if (successMessage) successMessage.classList.add('hidden');
-    if (leaderboardSection) leaderboardSection.classList.add('hidden');
-    if (loadingContainer) loadingContainer.classList.remove('hidden');
+// Screenshot Download
+function downloadScreenshot() {
+    console.log('Starting screenshot download...');
+    
+    if (studentsData.length === 0) {
+        showError('No leaderboard to capture. Please upload a file first!');
+        return;
+    }
+    
+    if (!downloadBtn) return;
+    
+    const originalHTML = downloadBtn.innerHTML;
+    downloadBtn.innerHTML = '<i class="fas fa-camera fa-spin"></i> <span>Capturing...</span>';
+    downloadBtn.disabled = true;
+    
+    // Create a clean version for screenshot
+    const screenshotContainer = document.createElement('div');
+    screenshotContainer.style.cssText = `
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        background: var(--color-background);
+        padding: 60px;
+        border-radius: 20px;
+        font-family: var(--font-family-base);
+        min-width: 800px;
+    `;
+    
+    // Add title
+    const title = document.createElement('h1');
+    title.textContent = 'Smart Study Classes Toppers';
+    title.style.cssText = `
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--color-primary);
+        text-transform: uppercase;
+    `;
+    screenshotContainer.appendChild(title);
+    
+    // Add PIN info
+    if (currentPin) {
+        const pinInfo = document.createElement('div');
+        pinInfo.style.cssText = `
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--color-bg-1);
+            border-radius: 10px;
+            border: 2px solid var(--color-primary);
+        `;
+        pinInfo.innerHTML = `
+            <p style="margin: 0; color: var(--color-text-secondary); font-size: 1rem;">Share PIN: <strong style="font-family: var(--font-family-mono); font-size: 1.5rem; color: var(--color-primary);">${currentPin}</strong></p>
+        `;
+        screenshotContainer.appendChild(pinInfo);
+    }
+    
+    // Clone podium and leaderboard
+    if (podium) {
+        const podiumClone = podium.cloneNode(true);
+        screenshotContainer.appendChild(podiumClone);
+    }
+    
+    if (completeStudentList) {
+        const leaderboardClone = completeStudentList.cloneNode(true);
+        screenshotContainer.appendChild(leaderboardClone);
+    }
+    
+    document.body.appendChild(screenshotContainer);
+    
+    html2canvas(screenshotContainer, {
+        backgroundColor: '#f8f9fa',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        height: screenshotContainer.scrollHeight,
+        width: screenshotContainer.scrollWidth
+    }).then(canvas => {
+        document.body.removeChild(screenshotContainer);
+        
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().slice(0, 10);
+        link.download = `Smart_Study_Classes_Leaderboard_${currentPin || 'demo'}_${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png');
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showSuccess('Screenshot downloaded successfully! 🎉');
+        
+    }).catch(error => {
+        console.error('Error generating screenshot:', error);
+        showError('Error capturing screenshot. Please try again!');
+        
+        if (document.body.contains(screenshotContainer)) {
+            document.body.removeChild(screenshotContainer);
+        }
+    }).finally(() => {
+        downloadBtn.innerHTML = originalHTML;
+        downloadBtn.disabled = false;
+    });
+}
+
+// Loading State Management
+function showLoading() {
+    if (loadingContainer) {
+        loadingContainer.classList.remove('hidden');
+        loadingContainer.style.display = 'flex';
+    }
+    hideError();
+    hideSuccess();
 }
 
 function hideLoading() {
-    if (loadingContainer) loadingContainer.classList.add('hidden');
+    if (loadingContainer) {
+        loadingContainer.classList.add('hidden');
+        loadingContainer.style.display = 'none';
+    }
 }
 
-// Message functions
-function showPremiumSuccess(message) {
+// Message Management
+function showSuccess(message) {
     if (successText) successText.textContent = message;
-    if (successMessage) successMessage.classList.remove('hidden');
-    setTimeout(() => hideSuccess(), 4000);
+    if (successMessage) {
+        successMessage.classList.remove('hidden');
+        setTimeout(() => hideSuccess(), 4000);
+    }
 }
 
 function hideSuccess() {
     if (successMessage) successMessage.classList.add('hidden');
 }
 
-function showPremiumError(message) {
+function showError(message) {
     hideLoading();
     if (errorText) errorText.textContent = message;
-    if (errorMessage) errorMessage.classList.remove('hidden');
-    setTimeout(() => hideError(), 6000);
+    if (errorMessage) {
+        errorMessage.classList.remove('hidden');
+        setTimeout(() => hideError(), 6000);
+    }
 }
 
 function hideError() {
     if (errorMessage) errorMessage.classList.add('hidden');
 }
 
-// FIXED Premium screenshot download
-function downloadScreenshot() {
-    console.log('Starting FIXED screenshot download...');
+// Entrance animations on load
+window.addEventListener('load', function() {
+    console.log('Window loaded, starting entrance animations');
     
-    if (studentsData.length === 0) {
-        showPremiumError('No leaderboard to capture. Please upload a file first! 📸');
-        return;
-    }
-    
-    const originalHTML = downloadBtn.innerHTML;
-    if (downloadBtn) {
-        downloadBtn.innerHTML = '<i class="fas fa-camera fa-spin"></i> <span>Capturing Clean Screenshot...</span>';
-        downloadBtn.disabled = true;
-    }
-    
-    const captureArea = document.getElementById('leaderboardCaptureArea');
-    if (!captureArea) {
-        showPremiumError('Capture area not found. Please try again! 🚫');
-        if (downloadBtn) {
-            downloadBtn.innerHTML = originalHTML;
-            downloadBtn.disabled = false;
-        }
-        return;
-    }
-    
-    // Enable screenshot mode
-    document.body.classList.add('screenshot-mode');
-    
-    // Create title
-    const titleElement = document.createElement('div');
-    titleElement.style.textAlign = 'center';
-    titleElement.style.marginBottom = '40px';
-    titleElement.style.padding = '20px';
-    titleElement.innerHTML = `
-        <h1 style="
-            font-family: Inter, sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #ff1b1b;
-            margin: 0;
-            text-transform: uppercase;
-        ">SMART STUDY CLASSES</h1>
-        <h2 style="
-            font-family: Montserrat, sans-serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: ${currentTheme === 'dark' ? '#ffffff' : '#212529'};
-            margin: 10px 0 0 0;
-            text-transform: uppercase;
-        ">Premium Student Leaderboard</h2>
-    `;
-    
-    captureArea.insertBefore(titleElement, captureArea.firstChild);
-    
-    const canvasOptions = {
-        backgroundColor: currentTheme === 'dark' ? '#1a1a1a' : '#f8f9fa',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        onclone: (clonedDoc) => {
-            const clonedElements = clonedDoc.querySelectorAll('*');
-            clonedElements.forEach(el => {
-                if (el.style) {
-                    el.style.backdropFilter = 'none';
-                    el.style.webkitBackdropFilter = 'none';
-                }
-            });
-        }
-    };
-    
-    html2canvas(captureArea, canvasOptions)
-        .then(canvas => {
-            captureArea.removeChild(titleElement);
-            document.body.classList.remove('screenshot-mode');
-            
-            const link = document.createElement('a');
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
-            const themeName = currentTheme === 'dark' ? 'Dark' : 'Light';
-            link.download = `Smart_Study_Classes_Toppers_${themeName}_${timestamp}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showPremiumSuccess('🎉 Clean premium screenshot captured successfully!');
-            
-            if (downloadBtn) {
-                downloadBtn.innerHTML = originalHTML;
-                downloadBtn.disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error('Screenshot error:', error);
-            
-            if (captureArea.contains(titleElement)) {
-                captureArea.removeChild(titleElement);
-            }
-            document.body.classList.remove('screenshot-mode');
-            
-            showPremiumError('Error capturing screenshot. Please try again! 📷');
-            
-            if (downloadBtn) {
-                downloadBtn.innerHTML = originalHTML;
-                downloadBtn.disabled = false;
-            }
-        });
-}
+    const headerElements = document.querySelectorAll('.header-content *');
+    headerElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        
+        setTimeout(() => {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});

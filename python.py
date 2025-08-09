@@ -1,3 +1,4 @@
+# Create updated Excel template with new structure
 import pandas as pd
 
 # Create a new Excel template with the updated data structure
@@ -35,12 +36,8 @@ data = {
 df = pd.DataFrame(data)
 
 # Save to Excel file
-df.to_excel('updated_student_leaderboard_template.xlsx', index=False, sheet_name='Students')
+df.to_excel('final_student_leaderboard_template.xlsx', index=False, sheet_name='Students')
 
-print("Updated Excel template created successfully!")
+print("Final Excel template created successfully!")
 print("\nTemplate structure:")
 print(df.head())
-print(f"\nTotal students in template: {len(df)}")
-print("\nColumn structure:")
-for col in df.columns:
-    print(f"- {col}: {df[col].dtype}")
