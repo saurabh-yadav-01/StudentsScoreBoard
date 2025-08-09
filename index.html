@@ -12,27 +12,34 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
+        <!-- Header with Theme Toggle -->
         <header class="header">
             <div class="header-content">
-                <div class="header-icon-container">
-                    <i class="fas fa-trophy header-icon"></i>
-                    <div class="icon-glow"></div>
+                <div class="header-top">
+                    <div class="header-icon-container">
+                        <i class="fas fa-trophy header-icon"></i>
+                        <div class="icon-glow"></div>
+                    </div>
+                    <div class="theme-toggle-container">
+                        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                            <i class="fas fa-moon theme-icon"></i>
+                        </button>
+                    </div>
                 </div>
                 <h1 class="header-title">SMART STUDY CLASSES</h1>
-                <h2 class="header-subtitle">Student Leaderboard</h2>
-                <p class="header-description">Upload Excel file to generate beautiful leaderboard</p>
+                <h2 class="header-subtitle">Premium Student Leaderboard</h2>
+                <p class="header-description">Upload Excel file to generate beautiful premium leaderboard</p>
             </div>
         </header>
 
         <!-- Template Download Section -->
         <section class="template-section">
-            <div class="template-container">
+            <div class="template-container glass-morphism">
                 <h3 class="template-title">📊 Excel Template</h3>
-                <p class="template-description">Download template with updated column structure</p>
+                <p class="template-description">Download our premium template with updated column structure</p>
                 <button class="btn btn--premium template-download-btn" id="templateDownloadBtn">
                     <i class="fas fa-download"></i>
-                    <span>Download Template</span>
+                    <span>Download Premium Template</span>
                     <div class="btn-shine"></div>
                 </button>
             </div>
@@ -103,25 +110,28 @@
                 </button>
             </div>
 
-            <!-- Top 3 Premium Podium -->
-            <div class="podium-container">
-                <div class="podium-title">
-                    <h2 class="podium-header">🏆 Top Performers 🏆</h2>
-                    <p class="podium-subtitle">Excellence Recognized</p>
+            <!-- Capture Area for Screenshot -->
+            <div class="leaderboard-capture-area" id="leaderboardCaptureArea">
+                <!-- Top 3 Premium Podium -->
+                <div class="podium-container">
+                    <div class="podium-title">
+                        <h2 class="podium-header">🏆 Premium Top Performers 🏆</h2>
+                        <p class="podium-subtitle">Excellence Recognized</p>
+                    </div>
+                    <div class="podium glass-morphism" id="podium">
+                        <!-- Podium positions will be populated by JavaScript -->
+                    </div>
                 </div>
-                <div class="podium glass-morphism" id="podium">
-                    <!-- Podium positions will be populated by JavaScript -->
-                </div>
-            </div>
 
-            <!-- Complete Leaderboard List -->
-            <div class="complete-leaderboard" id="completeLeaderboard">
-                <div class="complete-leaderboard-title">
-                    <h2 class="complete-header">📋 Complete Leaderboard Rankings 📋</h2>
-                    <p class="complete-subtitle">All Students - Ranked by Performance</p>
-                </div>
-                <div class="complete-student-list" id="completeStudentList">
-                    <!-- All student cards will be populated by JavaScript -->
+                <!-- Complete Leaderboard List -->
+                <div class="complete-leaderboard" id="completeLeaderboard">
+                    <div class="complete-leaderboard-title">
+                        <h2 class="complete-header">📋 Complete Leaderboard Rankings 📋</h2>
+                        <p class="complete-subtitle">All Students - Ranked by Performance</p>
+                    </div>
+                    <div class="complete-student-list" id="completeStudentList">
+                        <!-- All student cards will be populated by JavaScript -->
+                    </div>
                 </div>
             </div>
 
@@ -129,7 +139,7 @@
             <div class="download-section">
                 <button class="btn btn--premium btn--large download-btn" id="downloadBtn">
                     <i class="fas fa-camera"></i>
-                    <span>Capture Screenshot</span>
+                    <span>Capture Premium Screenshot</span>
                     <div class="btn-shine"></div>
                 </button>
             </div>
@@ -139,7 +149,7 @@
         <div class="demo-section">
             <button class="btn btn--outline demo-btn" id="demoBtn">
                 <i class="fas fa-play"></i>
-                <span>Try Demo</span>
+                <span>Try Premium Demo</span>
             </button>
         </div>
     </div>
