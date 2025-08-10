@@ -1,10 +1,10 @@
 // db.js
-const { Leaderboard, Student, initializeDatabase } = require('./models');
+import { Leaderboard, Student, initializeDatabase } from './models/index.js';
 
 // Initialize database on server start
-initializeDatabase();
+await initializeDatabase();
 
-module.exports = {
+export {
     Leaderboard,
     Student
 };

@@ -1,8 +1,14 @@
 // server.js
-const express = require('express');
+import express from 'express';
+import { Leaderboard, Student } from './db.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
-const { Leaderboard, Student } = require('./db');
-const path = require('path');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
@@ -15,13 +21,25 @@ app.get('/', (req, res) => {
 // Endpoint to create/download leaderboard with data and auto-generated PIN
 app.post('/api/leaderboard', async (req, res) => {
     try {
+        console.log('Received request to create leaderboard:', req.body);
         const { pin, students } = req.body;
+        
+        if (!pin || !students || !Array.isArray(students) || students.length === 0) {
+            console.error('Invalid request data:', { pin, studentsLength: students?.length });
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid request data'
+            });
+        }
+
+        console.log('Creating leaderboard with PIN:', pin);
         
         // Create leaderboard
         const leaderboard = await Leaderboard.create({
             pin: pin,
             title: 'Smart Study Classes Toppers'
         });
+        console.log('Leaderboard created:', leaderboard.toJSON());
 
         // Create students with ranks
         const studentRecords = students.map((student, index) => ({
@@ -34,17 +52,37 @@ app.post('/api/leaderboard', async (req, res) => {
             rank_position: index + 1
         }));
 
-        await Student.bulkCreate(studentRecords);
+        console.log('Creating student records:', studentRecords);
+        const createdStudents = await Student.bulkCreate(studentRecords, {
+            returning: true
+        });
+        console.log('Created students:', createdStudents.map(s => s.toJSON()));
+
+        // Verify the created data
+        const verification = await Leaderboard.findOne({
+            where: { pin },
+            include: [{
+                model: Student,
+                order: [['rank_position', 'ASC']]
+            }]
+        });
+
+        console.log('Verification result:', verification?.toJSON());
+
+        if (!verification) {
+            throw new Error('Data verification failed after creation');
+        }
 
         res.json({ 
             success: true, 
-            pin: pin 
+            pin: pin,
+            message: `Successfully created leaderboard with ${createdStudents.length} students`
         });
     } catch (error) {
         console.error('Error creating leaderboard:', error);
         res.status(500).json({ 
             success: false, 
-            error: 'Error creating leaderboard' 
+            error: error.message || 'Error creating leaderboard'
         });
     }
 });
@@ -53,23 +91,30 @@ app.post('/api/leaderboard', async (req, res) => {
 app.get('/api/leaderboard/:pin', async (req, res) => {
     try {
         const { pin } = req.params;
+        console.log('Fetching leaderboard for PIN:', pin);
         
+        // First find the leaderboard
         const leaderboard = await Leaderboard.findOne({
             where: { pin },
             include: [{
-                model: Student,
-                order: [['rank_position', 'ASC']]
+                model: Student
             }]
         });
 
         if (!leaderboard) {
+            console.log('No leaderboard found for PIN:', pin);
             return res.status(404).json({ 
                 success: false, 
                 error: 'Leaderboard not found' 
             });
         }
 
-        const processedStudents = leaderboard.students.map(student => ({
+        console.log('Found leaderboard:', leaderboard.toJSON());
+
+        // Sort students by rank_position
+        const sortedStudents = [...leaderboard.students].sort((a, b) => a.rank_position - b.rank_position);
+        
+        const processedStudents = sortedStudents.map(student => ({
             name: student.name,
             subject: student.subject,
             obtainedMarks: student.obtained_marks,
@@ -78,7 +123,9 @@ app.get('/api/leaderboard/:pin', async (req, res) => {
             originalIndex: student.rank_position - 1
         }));
 
-        res.json({
+        console.log('Processed students:', processedStudents);
+
+        const response = {
             success: true,
             data: {
                 pin: leaderboard.pin,
@@ -86,12 +133,20 @@ app.get('/api/leaderboard/:pin', async (req, res) => {
                 students: processedStudents,
                 created_at: leaderboard.created_at
             }
-        });
+        };
+
+        console.log('Sending response:', response);
+        res.json(response);
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
+        console.error('Error details:', error.message);
+        if (error.original) {
+            console.error('Database error:', error.original);
+        }
         res.status(500).json({ 
             success: false, 
-            error: 'Error fetching leaderboard' 
+            error: 'Error fetching leaderboard',
+            details: error.message 
         });
     }
 });

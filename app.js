@@ -26,25 +26,30 @@ let templateDownloadBtn, pinInput, pinSubmitBtn, pinDisplaySection, pinNumber, p
 let themeToggleBtn;
 
 // Initialize the application immediately
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM loaded - initializing application...');
     
-    // Initialize DOM elements first
-    initializeDOMElements();
-    
-    // Set proper initial state immediately
-    setInitialState();
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Initialize theme
-    initializeTheme();
-    
-    // Load demo data for PIN access
-    loadStoredDemo();
-    
-    console.log('Application initialized successfully');
+    try {
+        // Initialize DOM elements
+        initializeDOMElements();
+        
+        // Set proper initial state
+        setInitialState();
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Initialize theme
+        initializeTheme();
+        
+        // Load demo data for PIN access
+        await loadStoredDemo();
+        
+        console.log('Application initialized successfully');
+    } catch (error) {
+        console.error('Error during application initialization:', error);
+        showError('Failed to initialize application. Please refresh the page.');
+    }
 });
 
 // Set initial application state immediately
@@ -193,9 +198,14 @@ function setupEventListeners() {
     
     // Demo button
     if (demoBtn) {
-        demoBtn.addEventListener('click', function(e) {
+        demoBtn.addEventListener('click', async function(e) {
             e.preventDefault();
-            loadDemo();
+            try {
+                await loadDemo();
+            } catch (error) {
+                console.error('Error in demo button handler:', error);
+                showError('Failed to load demo data');
+            }
         });
     }
 
@@ -251,8 +261,8 @@ function toggleTheme() {
     }
 }
 
-// Database operations using MySQL
-const db = require('./db');
+// Database operations through API endpoints
+// Duplicate saveLeaderboardToDB removed to fix redeclaration error.
 
 function generatePin() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -260,26 +270,32 @@ function generatePin() {
 
 async function saveLeaderboardToDB(pin, data) {
     try {
-        // First create the leaderboard
-        const leaderboard = await db.Leaderboard.create({
-            pin: pin,
-            title: 'Smart Study Classes Toppers'
+        const baseUrl = window.location.origin; // Get current site URL
+        const response = await fetch(`${baseUrl}/api/leaderboard`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                pin: pin,
+                students: data
+            })
         });
 
-        // Then create all students
-        const studentRecords = data.map((student, index) => ({
-            leaderboard_pin: pin,
-            name: student.name,
-            subject: student.subject,
-            obtained_marks: student.obtainedMarks,
-            total_marks: student.totalMarks,
-            percentage: student.percentage,
-            rank_position: index + 1  // rank_position based on array index (already sorted by percentage)
-        }));
+        console.log('Save response status:', response.status);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error response:', errorText);
+            throw new Error(errorText || 'Failed to save leaderboard');
+        }
 
-        await db.Student.bulkCreate(studentRecords);
+        const result = await response.json();
+        console.log('Save response:', result);
+        
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to save leaderboard');
+        }
 
-        console.log('Leaderboard saved to database with PIN:', pin);
         return {
             pin: pin,
             title: 'Smart Study Classes Toppers',
@@ -287,33 +303,42 @@ async function saveLeaderboardToDB(pin, data) {
             created_at: new Date().toISOString()
         };
     } catch (error) {
-        console.error('Error in saveLeaderboardToDB:', error);
+        console.error('Error saving leaderboard:', error);
         throw error;
     }
 }
 
 async function getLeaderboardFromDB(pin) {
     try {
-        // Find the leaderboard with its associated students
-        const leaderboard = await db.Leaderboard.findOne({
-            where: { pin: pin },
-            include: [{
-                model: db.Student,
-                order: [['rank_position', 'ASC']]
-            }]
+        const baseUrl = window.location.origin; // Get current site URL
+        const response = await fetch(`${baseUrl}/api/leaderboard/${pin}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
 
-        if (!leaderboard) {
+        if (!response.ok) {
+            console.log('Response not OK:', response.status, response.statusText);
             return null;
         }
 
-        const processedStudents = leaderboard.students.map(student => ({
+        const result = await response.json();
+        console.log('API response:', result);
+        
+        if (!result.success || !result.data) {
+            console.log('No data in response');
+            return null;
+        }
+
+        const leaderboard = result.data;
+        const processedStudents = leaderboard.students.map((student, index) => ({
             name: student.name,
             subject: student.subject,
             obtainedMarks: student.obtained_marks,
             totalMarks: student.total_marks,
             percentage: parseFloat(student.percentage),
-            originalIndex: student.rank_position - 1
+            originalIndex: index
         }));
 
         return {
@@ -561,13 +586,14 @@ function handleFile(file) {
     processExcelFile(file);
 }
 
-function processExcelFile(file) {
+async function processExcelFile(file) {
     console.log('Processing Excel file...');
     showLoading();
     isProcessing = true;
     
     const reader = new FileReader();
-    reader.onload = function(e) {
+    
+    reader.onload = async function(e) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
@@ -592,16 +618,51 @@ function processExcelFile(file) {
             
             // Generate PIN and save to database
             currentPin = generatePin();
-            const saved = saveLeaderboardToDB(currentPin, studentsData);
+            console.log('Generated PIN:', currentPin);
             
-            hideLoading();
-            isProcessing = false;
-            
-            if (saved) {
-                showLeaderboardPage();
-                showSuccess(`Leaderboard created successfully! PIN: ${currentPin}`);
-            } else {
-                showError('Error saving leaderboard. Please try again.');
+            try {
+                const baseUrl = window.location.origin;
+                const response = await fetch(`${baseUrl}/api/leaderboard`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pin: currentPin,
+                        students: studentsData
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error response:', errorText);
+                    throw new Error(errorText || 'Failed to save data');
+                }
+
+                const result = await response.json();
+                console.log('Server response:', result);
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to save data');
+                }
+
+                // Verify the data was saved
+                const verification = await getLeaderboardFromDB(currentPin);
+                console.log('Verification result:', verification);
+
+                if (verification) {
+                    hideLoading();
+                    isProcessing = false;
+                    showLeaderboardPage();
+                    showSuccess(`Leaderboard created successfully! PIN: ${currentPin}`);
+                } else {
+                    throw new Error('Data verification failed');
+                }
+            } catch (dbError) {
+                console.error('Database error:', dbError);
+                hideLoading();
+                isProcessing = false;
+                showError('Error saving to database. Please try again.');
             }
             
         } catch (error) {
@@ -685,7 +746,7 @@ function findColumnValue(row, possibleKeys) {
 }
 
 // Demo Data Loading
-function loadDemo() {
+async function loadDemo() {
     console.log('Loading demo data...');
     
     if (isProcessing) return;
@@ -693,37 +754,64 @@ function loadDemo() {
     showLoading();
     isProcessing = true;
     
-    setTimeout(() => {
-        try {
-            studentsData = sampleData.map((student, index) => ({
-                name: student.Name,
-                subject: student.Subject,
-                obtainedMarks: student["Obtained Marks"],
-                totalMarks: student["Total Marks"],
-                percentage: student.Percentage,
-                originalIndex: index
-            })).sort((a, b) => b.percentage - a.percentage);
-            
-            // Generate PIN and save demo data
-            currentPin = generatePin();
-            const saved = saveLeaderboardToDB(currentPin, studentsData);
-            
-            hideLoading();
-            isProcessing = false;
-            
-            if (saved) {
-                showLeaderboardPage();
-                showSuccess(`Demo leaderboard loaded! PIN: ${currentPin}`);
-            } else {
-                showError('Error loading demo. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error loading demo data:', error);
-            hideLoading();
-            isProcessing = false;
-            showError('Error loading demo data. Please try again!');
+    try {
+        studentsData = sampleData.map((student, index) => ({
+            name: student.Name,
+            subject: student.Subject,
+            obtainedMarks: student["Obtained Marks"],
+            totalMarks: student["Total Marks"],
+            percentage: student.Percentage,
+            originalIndex: index
+        })).sort((a, b) => b.percentage - a.percentage);
+        
+        // Generate PIN and save demo data
+        currentPin = generatePin();
+        console.log('Generated PIN for demo:', currentPin);
+        
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/leaderboard`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                pin: currentPin,
+                students: studentsData
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error response:', errorText);
+            throw new Error(errorText || 'Failed to save demo data');
         }
-    }, 2000);
+
+        const result = await response.json();
+        console.log('Server response:', result);
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Failed to save demo data');
+        }
+        
+        hideLoading();
+        isProcessing = false;
+        
+        // Verify the data was saved
+        const verification = await getLeaderboardFromDB(currentPin);
+        console.log('Verification result:', verification);
+        
+        if (verification) {
+            showLeaderboardPage();
+            showSuccess(`Demo leaderboard loaded! PIN: ${currentPin}`);
+        } else {
+            throw new Error('Data verification failed');
+        }
+    } catch (error) {
+        console.error('Error loading demo data:', error);
+        hideLoading();
+        isProcessing = false;
+        showError('Error loading demo data. Please try again!');
+    }
 }
 
 // Leaderboard Display
