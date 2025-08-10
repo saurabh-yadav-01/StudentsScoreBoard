@@ -251,41 +251,77 @@ function toggleTheme() {
     }
 }
 
-// Database Simulation using LocalStorage
+// Database operations using MySQL
+const db = require('./db');
+
 function generatePin() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-function saveLeaderboardToDB(pin, data) {
+async function saveLeaderboardToDB(pin, data) {
     try {
-        const leaderboard = {
+        // First create the leaderboard
+        const leaderboard = await db.Leaderboard.create({
+            pin: pin,
+            title: 'Smart Study Classes Toppers'
+        });
+
+        // Then create all students
+        const studentRecords = data.map((student, index) => ({
+            leaderboard_pin: pin,
+            name: student.name,
+            subject: student.subject,
+            obtained_marks: student.obtainedMarks,
+            total_marks: student.totalMarks,
+            percentage: student.percentage,
+            rank_position: index + 1  // rank_position based on array index (already sorted by percentage)
+        }));
+
+        await db.Student.bulkCreate(studentRecords);
+
+        console.log('Leaderboard saved to database with PIN:', pin);
+        return {
             pin: pin,
             title: 'Smart Study Classes Toppers',
             students: data,
             created_at: new Date().toISOString()
         };
-        
-        localStorage.setItem(`leaderboard_${pin}`, JSON.stringify(leaderboard));
-        
-        // Also save to index for easy retrieval
-        const index = JSON.parse(localStorage.getItem('leaderboard_index') || '[]');
-        if (!index.includes(pin)) {
-            index.push(pin);
-            localStorage.setItem('leaderboard_index', JSON.stringify(index));
-        }
-        
-        console.log('Leaderboard saved to database with PIN:', pin);
-        return leaderboard;
     } catch (error) {
-        console.error('Error saving to database:', error);
-        return null;
+        console.error('Error in saveLeaderboardToDB:', error);
+        throw error;
     }
 }
 
-function getLeaderboardFromDB(pin) {
+async function getLeaderboardFromDB(pin) {
     try {
-        const data = localStorage.getItem(`leaderboard_${pin}`);
-        return data ? JSON.parse(data) : null;
+        // Find the leaderboard with its associated students
+        const leaderboard = await db.Leaderboard.findOne({
+            where: { pin: pin },
+            include: [{
+                model: db.Student,
+                order: [['rank_position', 'ASC']]
+            }]
+        });
+
+        if (!leaderboard) {
+            return null;
+        }
+
+        const processedStudents = leaderboard.students.map(student => ({
+            name: student.name,
+            subject: student.subject,
+            obtainedMarks: student.obtained_marks,
+            totalMarks: student.total_marks,
+            percentage: parseFloat(student.percentage),
+            originalIndex: student.rank_position - 1
+        }));
+
+        return {
+            pin: pin,
+            title: leaderboard.title,
+            students: processedStudents,
+            created_at: leaderboard.created_at
+        };
     } catch (error) {
         console.error('Error retrieving from database:', error);
         return null;
@@ -296,8 +332,9 @@ function getLeaderboardFromDB(pin) {
 function loadStoredDemo() {
     try {
         const demoPins = ['123456', '654321', '111111'];
-        demoPins.forEach(pin => {
-            if (!getLeaderboardFromDB(pin)) {
+        demoPins.forEach(async pin => {
+            const exists = await getLeaderboardFromDB(pin);
+            if (!exists) {
                 const processedData = sampleData.map((student, index) => ({
                     name: student.Name,
                     subject: student.Subject,
@@ -307,7 +344,11 @@ function loadStoredDemo() {
                     originalIndex: index
                 })).sort((a, b) => b.percentage - a.percentage);
                 
-                saveLeaderboardToDB(pin, processedData);
+                try {
+                    await saveLeaderboardToDB(pin, processedData);
+                } catch (error) {
+                    console.warn('Could not save demo data for PIN', pin, ':', error);
+                }
             }
         });
         console.log('Demo data loaded successfully');
@@ -329,26 +370,26 @@ function handlePinSubmit() {
     showLoading();
     
     setTimeout(() => {
-        try {
-            const leaderboard = getLeaderboardFromDB(pin);
-            
-            if (leaderboard && leaderboard.students) {
-                studentsData = leaderboard.students;
-                currentPin = pin;
+        getLeaderboardFromDB(pin)
+            .then(leaderboard => {
+                if (leaderboard && leaderboard.students) {
+                    studentsData = leaderboard.students;
+                    currentPin = pin;
+                    hideLoading();
+                    showLeaderboardPage();
+                    showSuccess(`Leaderboard loaded successfully! PIN: ${pin}`);
+                    console.log('PIN validation successful');
+                } else {
+                    hideLoading();
+                    showError('Invalid PIN. Please check and try again.');
+                    console.log('PIN validation failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error validating PIN:', error);
                 hideLoading();
-                showLeaderboardPage();
-                showSuccess(`Leaderboard loaded successfully! PIN: ${pin}`);
-                console.log('PIN validation successful');
-            } else {
-                hideLoading();
-                showError('Invalid PIN. Please check and try again.');
-                console.log('PIN validation failed');
-            }
-        } catch (error) {
-            console.error('Error validating PIN:', error);
-            hideLoading();
-            showError('Error accessing leaderboard. Please try again.');
-        }
+                showError('Error accessing leaderboard. Please try again.');
+            });
     }, 1500);
 }
 

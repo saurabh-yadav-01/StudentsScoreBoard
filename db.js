@@ -1,19 +1,10 @@
 // db.js
-const mysql = require('mysql2');
+const { Leaderboard, Student, initializeDatabase } = require('./models');
 
-const connection = mysql.createConnection({
-    host: 'localhost', // or your DB host
-    user: 'root',
-    password: 'root',
-    database: 'SmartTutorials'
-});
+// Initialize database on server start
+initializeDatabase();
 
-connection.connect(error => {
-    if (error) {
-        console.error('Error connecting to MySQL database:', error);
-    } else {
-        console.log('Connected to MySQL database!');
-    }
-});
-
-module.exports = connection;
+module.exports = {
+    Leaderboard,
+    Student
+};
